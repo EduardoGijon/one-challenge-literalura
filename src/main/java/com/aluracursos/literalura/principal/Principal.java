@@ -1,8 +1,7 @@
 package com.aluracursos.literalura.principal;
 
-import com.aluracursos.literalura.model.DatosGutendex;
-import com.aluracursos.literalura.model.DatosLibro;
-import com.aluracursos.literalura.model.Libro;
+import com.aluracursos.literalura.model.*;
+import com.aluracursos.literalura.repository.AutorRepository;
 import com.aluracursos.literalura.repository.LibroRepository;
 import com.aluracursos.literalura.service.ConsumoAPI;
 import com.aluracursos.literalura.service.ConvierteDatos;
@@ -16,11 +15,13 @@ public class Principal {
     private ConsumoAPI consumoAPI = new ConsumoAPI();
     private ConvierteDatos conversor = new ConvierteDatos();
     private Scanner teclado = new Scanner(System.in);
-    private LibroRepository repositorio;
+    private LibroRepository libroRepository;
+    private AutorRepository autorRepository;
 
     // Inyeccion de dependencias por constructor
-    public Principal(LibroRepository repositorio) {
-        this.repositorio = repositorio;
+    public Principal(LibroRepository libroRepository, AutorRepository autorRepository) {
+        this.libroRepository = libroRepository;
+        this.autorRepository = autorRepository;
     }
 
     public void muestraElMenu(){
@@ -30,6 +31,7 @@ public class Principal {
                     
                     1 - Buscar libro por título (API)
                     2 - Listar libros registrados (Base de Datos)
+                    3 - Listar autores registrados (Base de Datos)
                     0 - Salir
                     
                     """;
@@ -50,6 +52,9 @@ public class Principal {
                     break;
                 case 2:
                     listarLibrosRegistrados();
+                    break;
+                case 3:
+                    listarautoresRegistrados();
                     break;
                 case 0:
                     System.out.println("Saliendo del programa...");
@@ -74,10 +79,23 @@ public class Principal {
 
         if(libroBuscado.isPresent()){
             System.out.println("Libro encontrado: " + libroBuscado.get());
+            DatosLibro datosLibro = libroBuscado.get();
 
-            //Guardar en base de datos
+            //Verificar si el libro ya existe
+            if(libroRepository.findByTituloContainsIgnoreCase(datosLibro.titulo()).isPresent()){
+                System.out.println("El libro ya esta registrado en la base de datos,");
+                return;
+            }
+
+            // Logica para guardar Autor y libro
             Libro libro = new Libro(libroBuscado.get());
-            repositorio.save(libro);
+            //Buscamos si el autro ya existe
+            DatosAutor datosAutor = datosLibro.autor().get(0);
+            Autor autor = autorRepository.findByNombreIgnoreCase(datosAutor.nombre())
+                            .orElseGet(() -> autorRepository.save(new Autor(datosAutor)));
+
+            libro.setAutor(autor);
+            libroRepository.save(libro);
             System.out.println("Libro guardado exitosamente en la base de datos.");
 
         } else {
@@ -86,6 +104,13 @@ public class Principal {
     }
 
     private void listarLibrosRegistrados(){
-        repositorio.findAll().forEach(System.out::println);
+        libroRepository.findAll().forEach(System.out::println);
     }
+
+    private void listarautoresRegistrados(){
+        autorRepository.findAll().forEach(System.out::println);
+    }
+
+
+
 }

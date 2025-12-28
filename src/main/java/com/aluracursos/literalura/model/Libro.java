@@ -12,7 +12,8 @@ public class Libro {
     @Column(unique = true)
     private String titulo;
 
-    private String autor;
+    @ManyToOne
+    private Autor autor;
     private String idioma;
     private Double numeroDeDescargas;
 
@@ -22,19 +23,24 @@ public class Libro {
 
     public Libro(DatosLibro datosLibro){
         this.titulo = datosLibro.titulo();
-        // Logica para obtener el primer autor si existe
-        if(datosLibro.autor() != null && !datosLibro.autor().isEmpty()){
-            this.autor = datosLibro.autor().get(0).nombre();
-        } else {
-            this.autor = "Desconocido";
-        }
         this.idioma = datosLibro.idiomas().get(0);
         this.numeroDeDescargas = datosLibro.numeroDeDescargas();
     }
 
+    // metodo para asignar autor
+    public void setAutor(Autor autor){
+        this.autor = autor;
+    }
+
     @Override
     public String toString() {
-        return "Libro: " + titulo + " | Autor: " + autor + " | Idioma: " + idioma;
+        return
+                "----- LIBRO -----\n" +
+                        "Titulo: " + titulo + "\n" +
+                        "Autor: " + (autor != null ? autor.getNombre() : "Desconocido") + "\n" +
+                        "Idioma: " + idioma + "\n" +
+                        "Numero de descargas: " + numeroDeDescargas + "\n" +
+                        "-----------------"+ "\n";
     }
 
     public Long getId() {
@@ -53,12 +59,8 @@ public class Libro {
         this.titulo = titulo;
     }
 
-    public String getAutor() {
+    public Autor getAutor() {
         return autor;
-    }
-
-    public void setAutor(String autor) {
-        this.autor = autor;
     }
 
     public String getIdioma() {
