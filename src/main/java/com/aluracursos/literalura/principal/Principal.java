@@ -7,6 +7,7 @@ import com.aluracursos.literalura.service.ConsumoAPI;
 import com.aluracursos.literalura.service.ConvierteDatos;
 
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -32,6 +33,7 @@ public class Principal {
                     1 - Buscar libro por título (API)
                     2 - Listar libros registrados (Base de Datos)
                     3 - Listar autores registrados (Base de Datos)
+                    4 - Buscar autores vivos en un año determinado (Base de Datos)
                     0 - Salir
                     
                     """;
@@ -55,6 +57,9 @@ public class Principal {
                     break;
                 case 3:
                     listarautoresRegistrados();
+                    break;
+                case 4:
+                    listarAutoresVivos();
                     break;
                 case 0:
                     System.out.println("Saliendo del programa...");
@@ -111,6 +116,21 @@ public class Principal {
         autorRepository.findAll().forEach(System.out::println);
     }
 
-
+    private void listarAutoresVivos(){
+        System.out.println("Ingrese el año vivo de autor(es) que desea buscar: ");
+        try{
+            var anio = teclado.nextInt();
+            teclado.nextLine();
+            List<Autor> autores = autorRepository.autoresVivosEnDeterminadoAnio(anio);
+            if(autores.isEmpty()){
+                System.out.println("No se encontraron autores vivos en el año " + anio);
+            } else {
+                autores.forEach(System.out::println);
+            }
+        }catch (InputMismatchException e){
+            System.out.println("Por favor, ingrese un año válido.");
+            teclado.nextLine(); // Limpiar el buffer
+        }
+    }
 
 }
