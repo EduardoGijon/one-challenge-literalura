@@ -34,6 +34,7 @@ public class Principal {
                     2 - Listar libros registrados (Base de Datos)
                     3 - Listar autores registrados (Base de Datos)
                     4 - Buscar autores vivos en un año determinado (Base de Datos)
+                    5 - Buscar libros por idioma
                     0 - Salir
                     
                     """;
@@ -60,6 +61,9 @@ public class Principal {
                     break;
                 case 4:
                     listarAutoresVivos();
+                    break;
+                case 5:
+                    listarLibrosPorIdioma();
                     break;
                 case 0:
                     System.out.println("Saliendo del programa...");
@@ -130,6 +134,24 @@ public class Principal {
         }catch (InputMismatchException e){
             System.out.println("Por favor, ingrese un año válido.");
             teclado.nextLine(); // Limpiar el buffer
+        }
+    }
+
+    private void listarLibrosPorIdioma(){
+        System.out.println("""
+                Ingrese el idioma para buscar los libros:
+                es - español
+                en - inglés
+                fr - francés
+                pt - portugués
+                """);
+
+        var idioma = teclado.nextLine();
+        List<Libro> libros = libroRepository.findByIdioma(idioma);
+        if(libros.isEmpty()){
+            System.out.println("No hay libros registrados en ese idioma");
+        } else {
+            libros.forEach(System.out::println);
         }
     }
 
